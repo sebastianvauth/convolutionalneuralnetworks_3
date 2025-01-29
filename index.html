@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Convolution Operation - Part 1: 2D Convolution</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            font-size: 150%;
+        }
+        section {
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #ffffff;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease-in;
+        }
+        h1, h2, h3, h4 {
+            color: #333;
+            margin-top: 20px;
+        }
+        p, li {
+            line-height: 1.6;
+            color: #444;
+            margin-bottom: 20px;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        .image-placeholder, .interactive-placeholder, .continue-button, .vocab-section, .why-it-matters, .test-your-knowledge, .faq-section, .stop-and-think {
+            text-align: left;
+        }
+        .image-placeholder img, .interactive-placeholder img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+        }
+        .vocab-section, .why-it-matters, .test-your-knowledge, .faq-section, .stop-and-think {
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .vocab-section {
+            background-color: #f0f8ff;
+        }
+        .vocab-section h3 {
+            color: #1e90ff;
+            font-size: 0.75em;
+            margin-bottom: 5px;
+            margin-top: 5px;
+        }
+        .vocab-section h4 {
+            color: #000;
+            font-size: 0.9em;
+            margin-top: 10px;
+            margin-bottom: 8px;
+        }
+        .vocab-term {
+            font-weight: bold;
+            color: #1e90ff;
+        }
+        .why-it-matters {
+            background-color: #ffe6f0;
+        }
+        .why-it-matters h3 {
+            color: #d81b60;
+            font-size: 0.75em;
+            margin-bottom: 5px;
+            margin-top: 5px;
+        }
+        .stop-and-think {
+            background-color: #e6e6ff;
+        }
+        .stop-and-think h3 {
+            color: #4b0082;
+            font-size: 0.75em;
+            margin-bottom: 5px;
+            margin-top: 5px;
+        }
+        .continue-button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-top: 15px;
+            color: #ffffff;
+            background-color: #007bff;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .reveal-button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-top: 15px;
+            color: #ffffff;
+            background-color: #4b0082;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .test-your-knowledge {
+            background-color: #e6ffe6;
+        }
+        .test-your-knowledge h3 {
+            color: #28a745;
+            font-size: 0.75em;
+            margin-bottom: 5px;
+            margin-top: 5px;
+        }
+        .test-your-knowledge h4 {
+            color: #000;
+            font-size: 0.9em;
+            margin-top: 10px;
+            margin-bottom: 8px;
+        }
+        .test-your-knowledge p {
+            margin-bottom: 15px;
+        }
+        .check-button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-top: 15px;
+            color: #ffffff;
+            background-color: #28a745;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            font-size: 1em;
+        }
+        .faq-section {
+            background-color: #fffbea;
+        }
+        .faq-section h3 {
+            color: #ffcc00;
+            font-size: 0.75em;
+            margin-bottom: 5px;
+            margin-top: 5px;
+        }
+        .faq-section h4 {
+            color: #000;
+            font-size: 0.9em;
+            margin-top: 10px;
+            margin-bottom: 8px;
+        }
+    </style>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <section id="section1">
+        <h1>Diving into the Heart of CNNs: The Convolution Operation</h1>
+        <div class="image-placeholder">
+            <img src="/placeholder.svg?height=300&width=600" alt="A magnifying glass hovering over an image, revealing a grid of pixels. The magnifying glass transitions into a small grid labeled 'Kernel,' highlighting the connection between the two.">
+        </div>
+        <p>Alright, let's get to the core of what makes Convolutional Neural Networks so special: the convolution operation. This is where the magic happens, where the network learns to extract meaningful features from images. Think of it as a special way of multiplying matrices that captures spatial relationships within the image.</p>
+        <div class="continue-button" onclick="showNextSection(2)">Continue</div>
+    </section>
+
+    <section id="section2">
+        <h2>The Convolution Recipe</h2>
+        <p>Imagine you're sliding a small window, called a kernel or filter, across an image. At each step, you perform some calculations between the kernel and the portion of the image it's currently covering. This process extracts features from the image, creating what we call a feature map. Let's start with the most common type used for images: 2D convolution.</p>
+        <p>Let's break down the ingredients of this operation. We have:</p>
+        <ul>
+            <li><strong>Input (X):</strong> Our image, represented as a matrix of pixel values.</li>
+            <li><strong>Kernel (K):</strong> A smaller matrix, also called a filter, that slides across the input.</li>
+            <li><strong>Bias (b):</strong> A single number that's added to the result of the convolution.</li>
+        </ul>
+        <p>The kernel is the key to feature extraction. It's like a mini-pattern detector that learns to recognize specific features in the image.</p>
+        <div class="continue-button" onclick="showNextSection(3)">Continue</div>
+    </section>
+
+    <section id="section3">
+        <p>The convolution operation involves element-wise multiplication between the kernel and the corresponding part of the input it overlaps. Then, we sum up all those products and add the bias. This gives us a single value in the output feature map.</p>
+        <div class="interactive-placeholder">
+            <img src="/placeholder.svg?height=300&width=600" alt="An animation showing a 3x3 kernel sliding across a 5x5 input matrix. As the kernel moves, the overlapping elements are highlighted, and the element-wise multiplication is shown visually. The products are then summed, and the bias is added, resulting in a single value in the output feature map.">
+        </div>
+        <p>Here's the formula in LaTeX, nice and clear:</p>
+        <p>\[ (X * K)_{i,j} = \sum_{u=0}^{k-1} \sum_{v=0}^{l-1} X_{i+u, j+v} * K_{u,v} + b \]</p>
+        <p>Where:</p>
+        <ul>
+            <li>$$(X * K)_{i,j}$$ is the element at position (i, j) in the output feature map.</li>
+            <li>$$X$$ is the input matrix.</li>
+            <li>$$K$$ is the kernel matrix of size $$k \times l$$.</li>
+            <li>$$b$$ is the bias.</li>
+            <li>$$i$$ and $$j$$ are the row and column indices of the output feature map.</li>
+            <li>$$u$$ and $$v$$ are the row and column indices of the kernel.</li>
+        </ul>
+        <div class="continue-button" onclick="showNextSection(4)">Continue</div>
+    </section>
+
+    <section id="section4">
+        <p>Let's visualize this with a simple example. Suppose we have a 2x2 kernel:</p>
+        <p>\[ K = \begin{bmatrix} p & q \\ r & s \end{bmatrix} \]</p>
+        <p>And we're applying it to a region of the input that also contains letters:</p>
+        <p>\[ X = \begin{bmatrix} a & b \\ c & d \end{bmatrix} \]</p>
+        <p>The output for that region would be calculated as:</p>
+        <p>\[ a*p + b*q + c*r + d*s + b \]</p>
+        <p>We repeat this for every possible position of the kernel on the input.</p>
+        <div class="continue-button" onclick="showNextSection(5)">Continue</div>
+    </section>
+
+    <section id="section5">
+        <p>To make this even clearer, let's walk through a step-by-step interactive example.</p>
+        <div class="interactive-placeholder">
+            <img src="/placeholder.svg?height=300&width=600" alt="A 4x4 input matrix 'X' on the left (with values represented by letters a, b, c, d, etc.) and a 2x2 kernel 'K' (with values p, q, r, s). The kernel is initially positioned at the top-left corner of 'X'. Users can click a 'Next Step' button. Each click moves the kernel one position to the right (or down to the next row when it reaches the right edge). As the kernel moves, the corresponding elements in 'X' and 'K' are highlighted. Below the matrices, the calculation 'a*p + b*q + c*r + d*s + b' is displayed, and the values of a, b, c, d, p, q, r, s are updated as the kernel moves. The result of the calculation is shown in the corresponding position of the output feature map on the right.">
+        </div>
+        <p>See how the kernel slides across the input, and how the calculation is performed at each step? This is the essence of the convolution operation!</p>
+        <div class="why-it-matters">
+            <h3>Why It Matters</h3>
+            <p>The convolution operation is the fundamental building block of CNNs. It's what allows them to learn spatial hierarchies of features, from simple edges and corners to complex object parts. Understanding convolution is key to understanding how CNNs work their magic.</p>
+        </div>
+        <div class="continue-button" onclick="showNextSection(6)">Continue</div>
+    </section>
+
+    <section id="section6">
+        <p>Now, let's solidify our vocabulary and reflect on what we've learned.</p>
+        <div class="vocab-section">
+            <h3>Build Your Vocab</h3>
+            <h4 class="vocab-term">Convolution</h4>
+            <p>A mathematical operation that involves sliding a kernel (or filter) over an input matrix, performing element-wise multiplication and summation at each step, to produce an output called a feature map.</p>
+        </div>
+        <div class="continue-button" onclick="showNextSection(7)">Continue</div>
+    </section>
+
+    <section id="section7">
+        <div class="vocab-section">
+            <h3>Build Your Vocab</h3>
+            <h4 class="vocab-term">Kernel (or Filter)</h4>
+            <p>A small matrix used in the convolution operation to extract features from the input.</p>
+        </div>
+        <p>The kernel's values are learned during the training process.</p>
+        <div class="continue-button" onclick="showNextSection(8)">Continue</div>
+    </section>
+
+    <section id="section8">
+        <div class="vocab-section">
+            <h3>Build Your Vocab</h3>
+            <h4 class="vocab-term">Feature Map</h4>
+            <p>The output of the convolution operation. It represents the activation of a particular feature at different locations in the input.</p>
+        </div>
+        <div class="continue-button" onclick="showNextSection(9)">Continue</div>
+    </section>
+
+    <section id="section9">
+        <div class="vocab-section">
+            <h3>Build Your Vocab</h3>
+            <h4 class="vocab-term">Bias</h4>
+            <p>A single value that is added to the result of the convolution operation.</p>
+        </div>
+        <p>The bias allows the network to shift the activation function, providing more flexibility.</p>
+        <div class="stop-and-think">
+            <h3>Stop and Think</h3>
+            <h4>What do you think might happen if we used a larger kernel? How would that affect the size of the feature map and the types of features learned?</h4>
+            <button class="reveal-button" onclick="revealAnswer('stop-and-think-1')">Reveal</button>
+            <p id="stop-and-think-1" style="display: none;">A larger kernel would cover a larger area of the input at each step, resulting in a smaller feature map. It might learn larger-scale features but could also miss finer details. Smaller kernels, on the other hand, capture finer details but might not capture larger patterns as effectively.</p>
+        </div>
+        <div class="continue-button" onclick="showNextSection(10)">Continue</div>
+    </section>
+
+    <section id="section10">
+        <div class="test-your-knowledge">
+            <h3>Test Your Knowledge</h3>
+            <h4>Given a 3x3 kernel and a 5x5 input, what will be the dimensions of the output feature map without padding and with a stride of 1?</h4>
+            <button class="check-button" onclick="checkAnswer('test-1', 1)">5x5</button>
+            <button class="check-button" onclick="checkAnswer('test-1', 2)">3x3</button>
+            <button class="check-button" onclick="checkAnswer('test-1', 3)">2x2</button>
+            <button class="check-button" onclick="checkAnswer('test-1', 4)">1x1</button>
+            <p id="test-1-result" style="display: none;"></p>
+        </div>
+        <div class="continue-button" onclick="showNextSection(11)">Continue</div>
+    </section>
+
+    <section id="section11">
+        <div class="test-your-knowledge">
+            <h3>Test Your Knowledge</h3>
+            <h4>Using the formula from the lesson and a 3x3 input matrix X = [[1, 0, 1], [0, 1, 0], [1, 0, 1]] and a 2x2 kernel K = [[0, 1], [1, 0]] and a bias b = 0, calculate the top-left element of the output feature map.</h4>
+            <button class="check-button" onclick="checkAnswer('test-2', 1)">0</button>
+            <button class="check-button" onclick="checkAnswer('test-2', 2)">1</button>
+            <button class="check-button" onclick="checkAnswer('test-2', 3)">2</button>
+            <button class="check-button" onclick="checkAnswer('test-2', 4)">-1</button>
+            <p id="test-2-result" style="display: none;"></p>
+        </div>
+        <div class="faq-section">
+            <h3>Frequently Asked Questions</h3>
+            <h4>Why is the convolution operation called 'convolution'?</h4>
+            <p>The term 'convolution' comes from a similar mathematical operation in signal processing. In the context of CNNs, it refers to the sliding and element-wise multiplication process we've described. Although, technically, the operation performed in CNNs is more accurately called 'cross-correlation,' the term 'convolution' has become the standard in the deep learning community.</p>
+        </div>
+        <div class="continue-button" onclick="showNextSection(12)">Continue</div>
+    </section>
+
+    <section id="section12">
+        <p>Fantastic work! You've now grasped the fundamentals of the convolution operation. In the next part, we'll explore how convolution can be extended to 3D and discuss the concepts of local versus global feature search.</p>
+    </section>
+
+    <script>
+        // Show the first section initially
+        document.getElementById("section1").style.display = "block";
+        document.getElementById("section1").style.opacity = "1";
+
+        function showNextSection(nextSectionId) {
+            const currentButton = event.target;
+            const nextSection = document.getElementById("section" + nextSectionId);
+            
+            currentButton.style.display = "none";
+            
+            nextSection.style.display = "block";
+            setTimeout(() => {
+                nextSection.style.opacity = "1";
+            }, 10);
+
+            setTimeout(() => {
+                nextSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 500);
+        }
+
+        function revealAnswer(id) {
+            const revealText = document.getElementById(id);
+            const revealButton = event.target;
+            
+            revealText.style.display = "block";
+            revealButton.style.display = "none";
+        }
+
+        function checkAnswer(testId, selectedOption) {
+            const resultElement = document.getElementById(testId + "-result");
+            let explanation = "";
+            let isCorrect = false;
+
+            if (testId === "test-1") {
+                if (selectedOption === 2) {
+                    explanation = "Correct! The kernel can slide across the input in 3 positions horizontally and 3 positions vertically.";
+                    isCorrect = true;
+                } else if (selectedOption === 1) {
+                    explanation = "Incorrect. The output will be smaller than the input because the kernel cannot fully overlap the edges.";
+                } else if (selectedOption === 3) {
+                    explanation = "Incorrect. With a stride of 1, the kernel will have more than 2 positions horizontally and vertically.";
+                } else if (selectedOption === 4) {
+                    explanation = "Incorrect. The kernel can slide across more than one position in the input.";
+                }
+            } else if (testId === "test-2") {
+                if (selectedOption === 2) {
+                    explanation = "Correct! (1*0) + (0*1) + (0*1) + (1*0) + 0 = 0 + 0 + 0 + 0 + 0 = 0.";
+                    isCorrect = true;
+                } else {
+                    explanation = "Incorrect, try applying the formula again.";
+                }
+            }
+
+            resultElement.textContent = explanation;
+            resultElement.style.color = isCorrect ? "green" : "red";
+            resultElement.style.display = "block";
+        }
+    </script>
+</body>
+</html>
